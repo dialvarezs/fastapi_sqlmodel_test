@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "fastapi-plus-sqlalchemy"
+version = "0.1.0"
+description = ""
+authors = ["Diego Alvarez S. <dialvarezs@gmail.com>"]
+readme = "README.md"
+packages = [{include = "fastapi_plus_sqlalchemy"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+psycopg2-binary = "^2.9.3"
+SQLAlchemy = "^1.4.41"
+alembic = "^1.8.1"
+fastapi = "^0.85.0"
+uvicorn = {extras = ["standard"], version = "^0.18.3"}
+sqlmodel = "^0.0.8"
+
+
+[tool.poetry.group.dev.dependencies]
+poethepoet = "^0.16.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poe.tasks]
+start = { shell = "uvicorn myapi.main:app --reload" }
