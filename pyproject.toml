@@ -28,3 +28,4 @@ envfile = ".env"
 
 [tool.poe.tasks]
 start = { shell = "uvicorn myapi.main:app --reload" }
+shell = "poetry shell"
