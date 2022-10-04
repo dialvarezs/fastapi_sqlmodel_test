@@ -1,9 +1,9 @@
-from pydantic import BaseConfig
+from pydantic import BaseSettings
 
-class Config(BaseConfig):
+class Settings(BaseSettings):
     database_url: str
 
     class Config:
         env_file = ".env"
 
-config = Config()
+settings = Settings()
