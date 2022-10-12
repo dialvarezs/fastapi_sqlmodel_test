@@ -14,9 +14,9 @@
 	```bash
 	poetry install
 	```
-5. Activar una terminal dentro del entorno virtual
+5. Activar una terminal dentro del entorno virtual (cargando las variables de entorno)
 	```bash
-	poetry shell
+	poetry run poe shell
 	```
 6. Aplicar las migraciones para crear las tablas
 	```bash
