@@ -8,7 +8,7 @@ from alembic import context
 
 from sqlmodel import SQLModel
 
-from myapi.models import User
+from myapi.models import User, Group, UserGroupLink
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
