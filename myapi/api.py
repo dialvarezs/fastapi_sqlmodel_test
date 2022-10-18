@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session
 from sqlalchemy.exc import NoResultFound, IntegrityError
 from myapi.crud import (
@@ -13,19 +14,44 @@ from myapi.crud import (
 )
 
 from myapi.database import get_session
-from myapi.models import Group, GroupCreate, User, UserBase, UserCreate, UserRead, UserUpdate
+from myapi.models import (
+    APIToken,
+    Group,
+    GroupCreate,
+    User,
+    UserCreate,
+    UserRead,
+    UserUpdate,
+)
+from myapi.security import authenticate_user, create_jwt, get_current_active_user
 
 router = APIRouter()
 
 
-@router.get("/users/", response_model=list[UserRead])
-async def get_users(session: Session = Depends(get_session)):
+@router.get(
+    "/users/",
+    response_model=list[UserRead],
+)
+async def get_users(
+    session: Session = Depends(get_session),
+):
     return read_users(session)
 
 
 @router.post("/users/", response_model=UserRead)
-async def create_user(user: UserCreate, session: Session = Depends(get_session)):
+async def create_user(
+    user: UserCreate,
+    session: Session = Depends(get_session),
+):
     return insert_user(user, session)
+
+
+@router.get("/users/me", response_model=UserRead)
+async def get_user_me(
+    user: User = Depends(get_current_active_user),
+    session: Session = Depends(get_session),
+):
+    return user
 
 
 @router.get("/users/{user_id}", response_model=UserRead)
@@ -65,3 +91,13 @@ async def create_group(group: GroupCreate, session: Session = Depends(get_sessio
         return insert_group(group, session)
     except IntegrityError:
         raise HTTPException(status_code=400, detail="Group already exists")
+
+
+@router.post("/token", response_model=APIToken)
+async def login(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    session: Session = Depends(get_session),
+):
+    user = authenticate_user(form_data.username, form_data.password, session)
+    token = create_jwt({"sub": user.username})
+    return {"access_token": token, "token_type": "bearer"}

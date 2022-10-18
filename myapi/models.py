@@ -14,15 +14,18 @@ class UserBase(SQLModel):
     fullname: str = Field(max_length=64)
     age: Optional[int]
 
+
 class User(UserBase, table=True):
     __tablename__ = "users"
 
     id: int = Field(primary_key=True, default=None)
+    password: str = Field(max_length=256, nullable=True)
     is_active: bool = Field(default=True)
 
     groups: list["Group"] = Relationship(
         back_populates="users", link_model=UserGroupLink
     )
+
 
 class UserRead(UserBase):
     id: int
@@ -31,6 +34,7 @@ class UserRead(UserBase):
 
 
 class UserCreate(UserBase):
+    password: str = Field(max_length=256, nullable=True)
     group_ids: list[int] = []
 
 
@@ -64,6 +68,11 @@ class GroupCreate(GroupBase):
 class GroupUpdate(SQLModel):
     name: Optional[str] = Field(max_length=32)
     is_active: Optional[bool]
+
+
+class APIToken(SQLModel):
+    access_token: str
+    token_type: str
 
 
 UserRead.update_forward_refs()

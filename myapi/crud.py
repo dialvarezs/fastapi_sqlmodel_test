@@ -3,6 +3,7 @@ from sqlalchemy.exc import NoResultFound
 from sqlmodel import Session
 
 from myapi.models import Group, GroupCreate, User, UserBase, UserCreate, UserUpdate
+from myapi.security import hash_password
 
 
 def read_users(session: Session):
@@ -12,6 +13,7 @@ def read_users(session: Session):
 
 def insert_user(user: UserCreate, session: Session):
     user_db = User(**user.dict(exclude_unset=True, exclude={"group_ids"}))
+    user_db.password = hash_password(user.password)
     for group_id in user.group_ids:
         try:
             group = get_group_by_id(group_id, session)
@@ -26,6 +28,11 @@ def insert_user(user: UserCreate, session: Session):
 
 def get_user_by_id(user_id: int, session: Session) -> User:
     query = select(User).where(User.id == user_id)
+    return session.execute(query).scalar_one()
+
+
+def get_user_by_username(username: str, session: Session) -> User:
+    query = select(User).where(User.username == username)
     return session.execute(query).scalar_one()
 
 
