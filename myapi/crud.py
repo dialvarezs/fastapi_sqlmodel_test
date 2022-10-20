@@ -3,8 +3,15 @@ from sqlalchemy import select
 from sqlalchemy.exc import NoResultFound
 from sqlmodel import Session
 
-from myapi.models import Group, GroupCreate, User, UserBase, UserCreate, UserUpdate
-from myapi.security import hash_password
+from myapi.models import (
+    Group,
+    GroupCreate,
+    PasswordChange,
+    User,
+    UserCreate,
+    UserUpdate,
+)
+from myapi.security import auth_exception, hash_password, verify_password
 
 
 def read_users(session: Session) -> List[User]:
@@ -42,6 +49,18 @@ def update_user(user_id: int, user_data: UserUpdate, session: Session) -> User:
     for field, value in user_data.dict(exclude_none=True).items():
         setattr(user_db, field, value)
     session.commit()
+
+    return user_db
+
+
+def update_password(
+    user_id: int, change_password_data: PasswordChange, session: Session
+) -> User:
+    user_db = get_user_by_id(user_id, session)
+    if not verify_password(change_password_data.old_password, user_db.password):
+        raise auth_exception("Invalid password")
+    user_db.password = hash_password(change_password_data.new_password)
+    session.commit() 
 
     return user_db
 

@@ -49,9 +49,7 @@ def create_jwt(data: dict, expires_delta: timedelta = timedelta(days=1)) -> str:
 def get_current_user(
     token: str = Depends(oauth2_scheme), session: Session = Depends(get_session)
 ) -> User:
-    credentials_exception = HTTPException(
-        status_code=401, detail="Could not validate credentials"
-    )
+    credentials_exception = auth_exception(detail="Could not validate credentials")
 
     try:
         payload = jwt.decode(token, settings.secret_key, algorithms=["HS256"])
@@ -70,3 +68,7 @@ def get_current_active_user(current_user: User = Depends(get_current_user)) -> U
     if not current_user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
+
+
+def auth_exception(detail: str = "Invalid authentication"):
+    return HTTPException(status_code=401, detail=detail)

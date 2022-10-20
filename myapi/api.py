@@ -5,6 +5,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session
 from sqlalchemy.exc import NoResultFound, IntegrityError
 from myapi.crud import (
+    update_password,
     get_group_by_id,
     get_user_by_id,
     insert_group,
@@ -19,6 +20,7 @@ from myapi.models import (
     APIToken,
     Group,
     GroupCreate,
+    PasswordChange,
     User,
     UserCreate,
     UserRead,
@@ -50,8 +52,16 @@ async def create_user(
 @router.get("/users/me", response_model=UserRead)
 async def get_user_me(
     user: User = Depends(get_current_active_user),
+):
+    return user
+
+@router.post("/users/me/change-password/", response_model=UserRead)
+async def change_password_me(
+    password_change_data: PasswordChange,
+    user: User = Depends(get_current_active_user),
     session: Session = Depends(get_session),
 ):
+    user = update_password(user.id, password_change_data, session)
     return user
 
 

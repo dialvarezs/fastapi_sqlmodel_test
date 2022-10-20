@@ -74,5 +74,9 @@ class APIToken(SQLModel):
     access_token: str
     token_type: str
 
+class PasswordChange(SQLModel):
+    old_password: str
+    new_password: str
+
 
 UserRead.update_forward_refs()
