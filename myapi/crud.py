@@ -1,3 +1,4 @@
+from typing import List
 from sqlalchemy import select
 from sqlalchemy.exc import NoResultFound
 from sqlmodel import Session
@@ -6,12 +7,12 @@ from myapi.models import Group, GroupCreate, User, UserBase, UserCreate, UserUpd
 from myapi.security import hash_password
 
 
-def read_users(session: Session):
+def read_users(session: Session) -> List[User]:
     query = select(User)
     return session.execute(query).scalars().all()
 
 
-def insert_user(user: UserCreate, session: Session):
+def insert_user(user: UserCreate, session: Session) -> User:
     user_db = User(**user.dict(exclude_unset=True, exclude={"group_ids"}))
     user_db.password = hash_password(user.password)
     for group_id in user.group_ids:
@@ -45,7 +46,7 @@ def update_user(user_id: int, user_data: UserUpdate, session: Session) -> User:
     return user_db
 
 
-def read_groups(session: Session):
+def read_groups(session: Session) -> List[Group]:
     query = select(Group)
     return session.execute(query).scalars().all()
 
@@ -55,7 +56,7 @@ def get_group_by_id(group_id: int, session: Session) -> Group:
     return session.execute(query).scalar_one()
 
 
-def insert_group(group: GroupCreate, session: Session):
+def insert_group(group: GroupCreate, session: Session) -> Group:
     group_db = Group(**group.dict(exclude_unset=True))
     session.add(group_db)
     session.commit()

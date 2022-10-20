@@ -22,7 +22,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
-def authenticate_user(username: str, password: str, session: Session):
+def authenticate_user(username: str, password: str, session: Session) -> User:
     try:
         user = crud.get_user_by_username(username, session)
         if not verify_password(password, user.password):
@@ -35,7 +35,7 @@ def authenticate_user(username: str, password: str, session: Session):
     return user
 
 
-def create_jwt(data: dict, expires_delta: timedelta = timedelta(days=1)):
+def create_jwt(data: dict, expires_delta: timedelta = timedelta(days=1)) -> str:
     to_encode = {
         **data,
         "iat": datetime.utcnow(),

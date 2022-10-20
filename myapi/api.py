@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
@@ -30,7 +31,7 @@ router = APIRouter()
 
 @router.get(
     "/users/",
-    response_model=list[UserRead],
+    response_model=List[UserRead],
 )
 async def get_users(
     session: Session = Depends(get_session),
@@ -72,7 +73,7 @@ async def edit_user(
         raise HTTPException(status_code=404, detail="User not found")
 
 
-@router.get("/groups/", response_model=list[Group])
+@router.get("/groups/", response_model=List[Group])
 async def get_groups(session: Session = Depends(get_session)):
     return read_groups(session)
 

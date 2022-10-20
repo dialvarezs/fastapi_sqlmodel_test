@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 from sqlmodel import SQLModel, Field, Relationship
 
 
@@ -22,7 +22,7 @@ class User(UserBase, table=True):
     password: str = Field(max_length=256, nullable=True)
     is_active: bool = Field(default=True)
 
-    groups: list["Group"] = Relationship(
+    groups: List["Group"] = Relationship(
         back_populates="users", link_model=UserGroupLink
     )
 
@@ -30,12 +30,12 @@ class User(UserBase, table=True):
 class UserRead(UserBase):
     id: int
     is_active: bool
-    groups: list["Group"]
+    groups: List["Group"]
 
 
 class UserCreate(UserBase):
     password: str = Field(max_length=256, nullable=True)
-    group_ids: list[int] = []
+    group_ids: List[int] = []
 
 
 class UserUpdate(SQLModel):
@@ -43,7 +43,7 @@ class UserUpdate(SQLModel):
     fullname: Optional[str] = Field(max_length=64)
     age: Optional[int]
     is_active: Optional[bool]
-    groups_ids: Optional[list[int]]
+    groups_ids: Optional[List[int]]
 
 
 class GroupBase(SQLModel):
@@ -56,7 +56,7 @@ class Group(GroupBase, table=True):
     id: int = Field(primary_key=True, default=None)
     is_active: bool = Field(default=True)
 
-    users: list["User"] = Relationship(
+    users: List["User"] = Relationship(
         back_populates="groups", link_model=UserGroupLink
     )
 
