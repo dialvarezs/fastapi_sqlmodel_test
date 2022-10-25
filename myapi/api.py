@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, UploadFile
 from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session
@@ -27,6 +27,7 @@ from myapi.models import (
     UserUpdate,
 )
 from myapi.security import authenticate_user, create_jwt, get_current_active_user
+from myapi.utilities import save_user_image
 
 router = APIRouter()
 
@@ -55,6 +56,7 @@ async def get_user_me(
 ):
     return user
 
+
 @router.post("/users/me/change-password/", response_model=UserRead)
 async def change_password_me(
     password_change_data: PasswordChange,
@@ -73,7 +75,7 @@ async def get_user(user_id: int, session: Session = Depends(get_session)):
         raise HTTPException(status_code=404, detail="User not found")
 
 
-@router.patch("/users/{user_id}/edit", response_model=User)
+@router.patch("/users/{user_id}/edit", response_model=UserRead)
 async def edit_user(
     user_id: int, user_data: UserUpdate, session: Session = Depends(get_session)
 ):
@@ -81,6 +83,19 @@ async def edit_user(
         return update_user(user_id, user_data, session)
     except NoResultFound:
         raise HTTPException(status_code=404, detail="User not found")
+
+
+@router.post("/user/{user_id}/image", response_model=UserRead)
+async def set_user_image(
+    user_id: int, file: UploadFile, session: Session = Depends(get_session)
+):
+    if not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="File is not an image")
+    image_path = save_user_image(user_id, file)
+
+    return update_user(
+        user_id, UserUpdate(image_path=f"/{image_path}"), session
+    )
 
 
 @router.get("/groups/", response_model=List[Group])

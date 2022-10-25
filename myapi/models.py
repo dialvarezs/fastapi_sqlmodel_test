@@ -20,6 +20,7 @@ class User(UserBase, table=True):
 
     id: int = Field(primary_key=True, default=None)
     password: str = Field(max_length=256, nullable=True)
+    image_path: str = Field(max_length=256, nullable=True)
     is_active: bool = Field(default=True)
 
     groups: List["Group"] = Relationship(
@@ -29,6 +30,7 @@ class User(UserBase, table=True):
 
 class UserRead(UserBase):
     id: int
+    image_path: Optional[str]
     is_active: bool
     groups: List["Group"]
 
@@ -42,6 +44,7 @@ class UserUpdate(SQLModel):
     username: Optional[str] = Field(max_length=32)
     fullname: Optional[str] = Field(max_length=64)
     age: Optional[int]
+    image_path: Optional[str]
     is_active: Optional[bool]
     groups_ids: Optional[List[int]]
 
