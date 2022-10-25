@@ -1,20 +1,21 @@
 from typing import List
+
 from fastapi import APIRouter, Depends, UploadFile
 from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlmodel import Session
-from sqlalchemy.exc import NoResultFound, IntegrityError
+
 from myapi.crud import (
-    update_password,
     get_group_by_id,
     get_user_by_id,
     insert_group,
     insert_user,
     read_groups,
     read_users,
+    update_password,
     update_user,
 )
-
 from myapi.database import get_session
 from myapi.models import (
     APIToken,

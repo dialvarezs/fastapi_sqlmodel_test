@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta
+from typing import List
+
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from sqlmodel import Session
-from typing import List
 
 from myapi import crud
 from myapi.config import settings

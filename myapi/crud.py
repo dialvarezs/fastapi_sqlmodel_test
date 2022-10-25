@@ -1,4 +1,5 @@
 from typing import List
+
 from sqlalchemy import select
 from sqlalchemy.exc import NoResultFound
 from sqlmodel import Session
@@ -69,7 +70,7 @@ def update_password(
     if not verify_password(change_password_data.old_password, user_db.password):
         raise auth_exception("Invalid password")
     user_db.password = hash_password(change_password_data.new_password)
-    session.commit() 
+    session.commit()
 
     return user_db
 

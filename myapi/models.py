@@ -1,5 +1,6 @@
 from typing import List, Optional
-from sqlmodel import SQLModel, Field, Relationship
+
+from sqlmodel import Field, Relationship, SQLModel
 
 
 class UserGroupLink(SQLModel, table=True):
@@ -76,6 +77,7 @@ class GroupUpdate(SQLModel):
 class APIToken(SQLModel):
     access_token: str
     token_type: str
+
 
 class PasswordChange(SQLModel):
     old_password: str

@@ -19,6 +19,8 @@ python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 
 [tool.poetry.group.dev.dependencies]
 poethepoet = "^0.16.2"
+black = "^22.10.0"
+isort = "^5.10.1"
 
 [build-system]
 requires = ["poetry-core"]
@@ -28,5 +30,8 @@ build-backend = "poetry.core.masonry.api"
 envfile = ".env"
 
 [tool.poe.tasks]
+_isort = "isort -q myapi migrations"
+_black = "black -q myapi migrations"
+format = ["_isort", "_black"]
 start = { shell = "uvicorn myapi.main:app --reload" }
 shell = "poetry shell"

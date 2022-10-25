@@ -5,10 +5,9 @@ Revises: ef932b2ad2b3
 Create Date: 2022-10-13 16:42:39.062919
 
 """
-from alembic import op
 import sqlalchemy as sa
 import sqlmodel
-
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "383f2a446942"
