@@ -47,7 +47,16 @@ def get_user_by_username(username: str, session: Session) -> User:
 def update_user(user_id: int, user_data: UserUpdate, session: Session) -> User:
     user_db = get_user_by_id(user_id, session)
     for field, value in user_data.dict(exclude_none=True).items():
-        setattr(user_db, field, value)
+        if field == "group_ids":
+            user_db.groups = []
+            for group_id in value:
+                try:
+                    group = get_group_by_id(group_id, session)
+                    user_db.groups.append(group)
+                except NoResultFound:
+                    pass
+        else:
+            setattr(user_db, field, value)
     session.commit()
 
     return user_db

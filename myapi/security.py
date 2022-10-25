@@ -4,6 +4,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from sqlmodel import Session
+from typing import List
 
 from myapi import crud
 from myapi.config import settings
@@ -72,3 +73,15 @@ def get_current_active_user(current_user: User = Depends(get_current_user)) -> U
 
 def auth_exception(detail: str = "Invalid authentication"):
     return HTTPException(status_code=401, detail=detail)
+
+
+class GroupChecker:
+    def __init__(self, allowed_groups: List[str]) -> None:
+        self.allowed_groups = allowed_groups
+
+    def __call__(self, user: User = Depends(get_current_active_user)):
+        user_groups = [g.name for g in user.groups]
+        for group in self.allowed_groups:
+            if group in user_groups:
+                return
+        raise HTTPException(status_code=403, detail="Operation not permited")

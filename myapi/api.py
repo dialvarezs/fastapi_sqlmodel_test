@@ -26,10 +26,17 @@ from myapi.models import (
     UserRead,
     UserUpdate,
 )
-from myapi.security import authenticate_user, create_jwt, get_current_active_user
+from myapi.security import (
+    GroupChecker,
+    authenticate_user,
+    create_jwt,
+    get_current_active_user,
+)
 from myapi.utilities import save_user_image
 
 router = APIRouter()
+
+allow_manage_users = GroupChecker(allowed_groups=["administrators"])
 
 
 @router.get(
@@ -42,7 +49,9 @@ async def get_users(
     return read_users(session)
 
 
-@router.post("/users/", response_model=UserRead)
+@router.post(
+    "/users/", response_model=UserRead, dependencies=[Depends(allow_manage_users)]
+)
 async def create_user(
     user: UserCreate,
     session: Session = Depends(get_session),
@@ -75,7 +84,11 @@ async def get_user(user_id: int, session: Session = Depends(get_session)):
         raise HTTPException(status_code=404, detail="User not found")
 
 
-@router.patch("/users/{user_id}/edit", response_model=UserRead)
+@router.patch(
+    "/users/{user_id}/edit",
+    response_model=UserRead,
+    # dependencies=[Depends(allow_manage_users)],
+)
 async def edit_user(
     user_id: int, user_data: UserUpdate, session: Session = Depends(get_session)
 ):
@@ -93,9 +106,7 @@ async def set_user_image(
         raise HTTPException(status_code=400, detail="File is not an image")
     image_path = save_user_image(user_id, file)
 
-    return update_user(
-        user_id, UserUpdate(image_path=f"/{image_path}"), session
-    )
+    return update_user(user_id, UserUpdate(image_path=f"/{image_path}"), session)
 
 
 @router.get("/groups/", response_model=List[Group])

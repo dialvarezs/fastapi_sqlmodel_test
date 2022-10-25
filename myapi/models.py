@@ -46,7 +46,7 @@ class UserUpdate(SQLModel):
     age: Optional[int]
     image_path: Optional[str]
     is_active: Optional[bool]
-    groups_ids: Optional[List[int]]
+    group_ids: Optional[List[int]]
 
 
 class GroupBase(SQLModel):
