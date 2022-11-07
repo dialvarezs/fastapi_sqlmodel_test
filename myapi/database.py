@@ -1,5 +1,3 @@
-import imp
-
 from sqlmodel import Session, create_engine
 
 from myapi.config import settings
