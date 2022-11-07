@@ -33,7 +33,7 @@
 
 Ejecutar `git pull` para obtener la última versión, y luego ejecutar los pasos 4 a 7 (por si es que hubieron cambios en las dependencias o en la base de datos).
 
-### En VS Code no funciona el autocompletado, y veo una advertencia que dice `Import ... could not be resolved from source`
+### En VS Code no funciona el autocompletado, y veo una advertencia que dice "Import `...` could not be resolved from source"
 
 Por defecto, Visual Studio Code utilizará el intérprete del sistema, por lo que el autocompletado no funcionará para las dependencias instaladas a través de Poetry. Entonces, es necesario indicarle a VSCode que utilice el intérprete del entorno virtual, lo cual debe hacerse de la siguiente manera:
 
