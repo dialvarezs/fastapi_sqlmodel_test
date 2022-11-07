@@ -1,4 +1,4 @@
-# Cómo inicializar el proyecto
+## Cómo inicializar el proyecto
 
 1. Clonar este repositorio
 	```bash
@@ -26,3 +26,25 @@
 	```bash
 	poe start
 	```
+
+## Preguntas comunes
+
+### ¿Y si ya tengo el proyecto clonado (pero no tengo la última versión)?
+
+Ejecutar `git pull` para obtener la última versión, y luego ejecutar los pasos 4 a 7 (por si es que hubieron cambios en las dependencias o en la base de datos).
+
+### En VS Code no funciona el autocompletado, y veo una advertencia que dice `Import ... could not be resolved from source`
+
+Por defecto, Visual Studio Code utilizará el intérprete del sistema, por lo que el autocompletado no funcionará para las dependencias instaladas a través de Poetry. Entonces, es necesario indicarle a VSCode que utilice el intérprete del entorno virtual, lo cual debe hacerse de la siguiente manera:
+
+1. Buscar la opción `Python: Select Interpreter` (presionar `Ctrl+Shift+P` y empezar a escribir).
+
+2. La opción mostrará una lista, donde debería salir una entrada que tenga la etiqueta "Poetry", seleccionar esa.
+
+3. En caso de que en la lista no salga una entrada con la etiqueta Poetry, se puede ejecutar en el directorio del proyecto
+   
+   ```bash
+   poetry run which python
+   ```
+   
+   El último comando entregará la ruta completa del intérprete, la cual puede pegarse en el campo de texto, en lugar de seleccionar una de las opciones.
