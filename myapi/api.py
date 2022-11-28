@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, UploadFile
 from fastapi.exceptions import HTTPException
@@ -7,12 +7,18 @@ from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlmodel import Session
 
 from myapi.crud import (
-    get_group_by_id,
-    get_user_by_id,
+    select_group_by_id,
+    select_note_by_id,
+    select_user_by_id,
     insert_group,
+    insert_note,
     insert_user,
-    read_groups,
-    read_users,
+    select_groups,
+    select_notes,
+    select_public_notes,
+    select_users,
+    select_user_notes,
+    update_note,
     update_password,
     update_user,
 )
@@ -21,6 +27,9 @@ from myapi.models import (
     APIToken,
     Group,
     GroupCreate,
+    Note,
+    NoteCreate,
+    NoteUpdate,
     PasswordChange,
     User,
     UserCreate,
@@ -37,27 +46,27 @@ from myapi.utilities import save_user_image
 
 router = APIRouter()
 
-allow_manage_users = GroupChecker(allowed_groups=["administrators"])
+allow_manage_users = GroupChecker(allowed_groups=["user_manager"])
+allow_manage_notes = GroupChecker(allowed_groups=["note_manager"])
 
 
 @router.get(
-    "/users/",
-    response_model=List[UserRead],
+    "/users/", response_model=List[UserRead], dependencies=[Depends(allow_manage_users)]
 )
 async def get_users(
     session: Session = Depends(get_session),
 ):
-    return read_users(session)
+    return select_users(session)
 
 
 @router.post(
     "/users/", response_model=UserRead, dependencies=[Depends(allow_manage_users)]
 )
 async def create_user(
-    user: UserCreate,
+    user_data: UserCreate,
     session: Session = Depends(get_session),
 ):
-    return insert_user(user, session)
+    return insert_user(user_data, session)
 
 
 @router.get("/users/me", response_model=UserRead)
@@ -77,10 +86,14 @@ async def change_password_me(
     return user
 
 
-@router.get("/users/{user_id}", response_model=UserRead)
+@router.get(
+    "/users/{user_id}",
+    response_model=UserRead,
+    dependencies=[Depends(allow_manage_users)],
+)
 async def get_user(user_id: int, session: Session = Depends(get_session)):
     try:
-        return get_user_by_id(user_id, session)
+        return select_user_by_id(user_id, session)
     except NoResultFound:
         raise HTTPException(status_code=404, detail="User not found")
 
@@ -88,6 +101,7 @@ async def get_user(user_id: int, session: Session = Depends(get_session)):
 @router.patch(
     "/users/{user_id}/edit",
     response_model=UserRead,
+    dependencies=[Depends(allow_manage_users)],
 )
 async def edit_user(
     user_id: int, user_data: UserUpdate, session: Session = Depends(get_session)
@@ -98,7 +112,11 @@ async def edit_user(
         raise HTTPException(status_code=404, detail="User not found")
 
 
-@router.post("/user/{user_id}/image", response_model=UserRead)
+@router.post(
+    "/user/{user_id}/image",
+    response_model=UserRead,
+    dependencies=[Depends(allow_manage_users)],
+)
 async def set_user_image(
     user_id: int, file: UploadFile, session: Session = Depends(get_session)
 ):
@@ -111,21 +129,23 @@ async def set_user_image(
 
 @router.get("/groups/", response_model=List[Group])
 async def get_groups(session: Session = Depends(get_session)):
-    return read_groups(session)
+    return select_groups(session)
 
 
 @router.get("/groups/{group_id}", response_model=Group)
 async def get_group(group_id: int, session: Session = Depends(get_session)):
     try:
-        return get_group_by_id(group_id, session)
+        return select_group_by_id(group_id, session)
     except NoResultFound:
         raise HTTPException(status_code=404, detail="Group not found")
 
 
-@router.post("/groups/", response_model=Group)
-async def create_group(group: GroupCreate, session: Session = Depends(get_session)):
+@router.post(
+    "/groups/", response_model=Group, dependencies=[Depends(allow_manage_users)]
+)
+async def create_group(group_data: GroupCreate, session: Session = Depends(get_session)):
     try:
-        return insert_group(group, session)
+        return insert_group(group_data, session)
     except IntegrityError:
         raise HTTPException(status_code=400, detail="Group already exists")
 
@@ -138,3 +158,75 @@ async def login(
     user = authenticate_user(form_data.username, form_data.password, session)
     token = create_jwt({"sub": user.username})
     return {"access_token": token, "token_type": "bearer"}
+
+
+@router.post("/notes/", response_model=Note)
+async def create_note(
+    note_data: NoteCreate,
+    user: User = Depends(get_current_active_user),
+    session: Session = Depends(get_session),
+):
+    return insert_note(note_data, user, session)
+
+
+@router.patch("/notes/{note_id}", response_model=Note)
+async def edit_note(
+    note_id: int,
+    note_data: NoteUpdate,
+    user: User = Depends(get_current_active_user),
+    session: Session = Depends(get_session),
+):
+    note_db = select_note_by_id(note_id, session)
+    if note_db.user != user:
+        allow_manage_notes(user)
+    return update_note(note_id, note_data, session)
+
+
+@router.get(
+    "/notes/", response_model=List[Note], dependencies=[Depends(allow_manage_notes)]
+)
+async def get_notes(
+    session: Session = Depends(get_session),
+):
+    return select_notes(session)
+
+
+@router.get("/notes/public", response_model=List[Note])
+async def get_public_notes(
+    session: Session = Depends(get_session),
+):
+    return select_public_notes(session)
+
+
+@router.get("/me/notes/", response_model=List[Note])
+async def get_notes_me(
+    user: User = Depends(get_current_active_user),
+    session: Session = Depends(get_session),
+    archived: Optional[bool] = None,
+):
+    return select_user_notes(user.id, session, archived)
+
+
+@router.get(
+    "/{user_id}/notes",
+    response_model=List[Note],
+    dependencies=[Depends(allow_manage_notes)],
+)
+async def get_user_notes(
+    user_id: int,
+    session: Session = Depends(get_session),
+    archived: Optional[bool] = None,
+):
+    return select_user_notes(user_id, session, archived)
+
+
+@router.get("/notes/{note_id}", response_model=Note)
+async def get_note(
+    note_id: int,
+    user: User = Depends(get_current_active_user),
+    session: Session = Depends(get_session),
+):
+    note = select_note_by_id(note_id, session)
+    if not note.is_public and note.user != user:
+        allow_manage_notes(user)
+    return note

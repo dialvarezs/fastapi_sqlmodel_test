@@ -26,7 +26,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def authenticate_user(username: str, password: str, session: Session) -> User:
     try:
-        user = crud.get_user_by_username(username, session)
+        user = crud.select_user_by_username(username, session)
         if not verify_password(password, user.password):
             raise Exception("Incorrect password")
     except Exception:
@@ -61,7 +61,7 @@ def get_current_user(
     except JWTError:
         raise credentials_exception
 
-    user = crud.get_user_by_username(username, session)
+    user = crud.select_user_by_username(username, session)
 
     return user
 
