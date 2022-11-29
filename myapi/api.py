@@ -7,17 +7,17 @@ from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlmodel import Session
 
 from myapi.crud import (
-    select_group_by_id,
-    select_note_by_id,
-    select_user_by_id,
     insert_group,
     insert_note,
     insert_user,
+    select_group_by_id,
     select_groups,
+    select_note_by_id,
     select_notes,
     select_public_notes,
-    select_users,
+    select_user_by_id,
     select_user_notes,
+    select_users,
     update_note,
     update_password,
     update_user,
@@ -146,7 +146,9 @@ async def get_group(group_id: int, session: Session = Depends(get_session)):
 @router.post(
     "/groups/", response_model=Group, dependencies=[Depends(allow_manage_users)]
 )
-async def create_group(group_data: GroupCreate, session: Session = Depends(get_session)):
+async def create_group(
+    group_data: GroupCreate, session: Session = Depends(get_session)
+):
     try:
         return insert_group(group_data, session)
     except IntegrityError:

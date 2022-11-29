@@ -10,7 +10,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_methods=["GET", "POST", "PATCH", "OPTIONS"],
-    allow_headers=["*"]
+    allow_headers=["*"],
 )
 
 app.mount("/storage", StaticFiles(directory=settings.storage_dir), name="storage")
