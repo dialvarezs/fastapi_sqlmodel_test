@@ -66,7 +66,10 @@ async def create_user(
     user_data: UserCreate,
     session: Session = Depends(get_session),
 ):
-    return insert_user(user_data, session)
+    try:
+        return insert_user(user_data, session)
+    except IntegrityError:
+        raise HTTPException(status_code=400, detail="Username already exists")
 
 
 @router.get("/users/me", response_model=UserRead)
