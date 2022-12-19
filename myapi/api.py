@@ -116,7 +116,7 @@ async def edit_user(
 
 
 @router.post(
-    "/user/{user_id}/image",
+    "/users/{user_id}/image",
     response_model=UserRead,
     dependencies=[Depends(allow_manage_users)],
 )
