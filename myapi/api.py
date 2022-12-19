@@ -102,7 +102,7 @@ async def get_user(user_id: int, session: Session = Depends(get_session)):
 
 
 @router.patch(
-    "/users/{user_id}/edit",
+    "/users/{user_id}",
     response_model=UserRead,
     dependencies=[Depends(allow_manage_users)],
 )
